@@ -1,4 +1,4 @@
-# Project 2: Collaboration and Cooperation
+# Project 3: Collaboration and Cooperation
 
 Author: [Harald Wilbertz](http://github.com/wilbertz) 
 
