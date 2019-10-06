@@ -23,13 +23,14 @@
     - agent.py (The agent used for learning)
     - checkpoint_actor.pth (The neural network weights for the actor)
     - checkpoint_critic.pth (The neural network weights for the critic)
+    - .gitignore (Git uses it to determine which files and directories to ignore)
     - images /  
         - robot-table-tennis.gif  (Image of a robot playing tennis)
         - scores_plot.png (Plot of the scores during the learning process)
         
 ## Installation <a name="installation"></a>
 
-This project was written in Python 3.6, using a Jupyter Notebook on Anaconda. Currently (Septemebr 2019) you cannot use Python 3.7, since tensorflow 1.7.1 doesn't have a version corresponding to python 3.7 yet.
+This project was written in Python 3.6, using a Jupyter Notebook on Anaconda. Currently (September 2019) you cannot use Python 3.7, since tensorflow 1.7.1 doesn't have a version corresponding to python 3.7 yet.
 
 ## Instructions <a name="instructions"></a>
 
