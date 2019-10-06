@@ -24,7 +24,7 @@
     - checkpoint_actor.pth (The neural network weights for the actor)
     - checkpoint_critic.pth (The neural network weights for the critic)
     - images /  
-        - random_agent.gif  (Animated image of environment)
+        - robot-table-tennis.gif  (Image of a robot playing tennis)
         - scores_plot.png (Plot of the scores during the learning process)
         
 ## Installation <a name="installation"></a>
