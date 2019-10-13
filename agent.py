@@ -12,13 +12,20 @@ import torch.nn.functional as f
 import torch.optim as optim
 
 
-GAMMA = 0.99                    # discount factor
-TAU = 1e-3                      # for soft update of target parameters
-LR_ACTOR = 1e-3                 # learning rate of the actor
-LR_CRITIC = 1e-3                # learning rate of the critic
-WEIGHT_DECAY = 0.0000           # L2 weight decay
-BATCH_SIZE = 1024               # mini batch size
-BUFFER_SIZE = int(1e6)          # replay buffer size
+BUFFER_SIZE = int(1e6)  # replay buffer size
+BATCH_SIZE = 128        # minibatch size
+LR_ACTOR = 1e-3         # learning rate of the actor
+LR_CRITIC = 1e-3        # learning rate of the critic
+WEIGHT_DECAY = 0        # L2 weight decay
+LEARN_EVERY = 1         # learning timestep interval
+LEARN_NUM = 5           # number of learning passes
+GAMMA = 0.99            # discount factor
+TAU = 8e-3              # for soft update of target parameters
+OU_SIGMA = 0.2          # Ornstein-Uhlenbeck noise parameter, volatility
+OU_THETA = 0.15         # Ornstein-Uhlenbeck noise parameter, speed of mean reversion
+EPS_START = 5.0         # initial value for epsilon in noise decay process in Agent.act()
+EPS_EP_END = 300        # episode to end the noise decay process
+EPS_FINAL = 0           # final value for epsilon after decay
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -28,7 +35,38 @@ ExperienceTuple = namedtuple("Experience", field_names=["state", "action", "rewa
 
 class Agent:
     """ The reinforcement learning agent.  """
-    pass
+    def __init__(self, state_size, action_size, num_agents, random_seed):
+        """Initialize an Agent object.
+        Params
+        ======
+            state_size (int): dimension of each state
+            action_size (int): dimension of each action
+            num_agents (int): number of agents
+            random_seed (int): random seed
+        """
+        self.state_size = state_size
+        self.action_size = action_size
+        self.num_agents = num_agents
+        self.seed = random.seed(random_seed)
+        self.eps = EPS_START
+        self.eps_decay = 1/(EPS_EP_END*LEARN_NUM)  # set decay rate based on epsilon end target
+        self.timestep = 0
+
+        # Actor Network (w/ Target Network)
+        self.actor_local = Actor(state_size, action_size, random_seed).to(device)
+        self.actor_target = Actor(state_size, action_size, random_seed).to(device)
+        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
+
+        # Critic Network (w/ Target Network)
+        self.critic_local = Critic(state_size, action_size, random_seed).to(device)
+        self.critic_target = Critic(state_size, action_size, random_seed).to(device)
+        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
+
+        # Noise process
+        self.noise = OrnsteinUhlenbeckNoise((num_agents, action_size), random_seed)
+
+        # Replay memory
+        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
 
 
 class OrnsteinUhlenbeckNoise:
