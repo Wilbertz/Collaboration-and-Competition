@@ -68,6 +68,17 @@ class Agent:
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
 
+    def step(self, state, action, reward, next_state, done, agent_number):
+        """Save experience in replay memory, and use random sample from buffer to learn."""
+        self.timestep += 1
+        # Save experience / reward
+        self.memory.add(state, action, reward, next_state, done)
+        # Learn, if enough samples are available in memory and at learning interval settings
+        if len(self.memory) > BATCH_SIZE and self.timestep % LEARN_EVERY == 0:
+            for _ in range(LEARN_NUM):
+                experiences = self.memory.sample()
+                self.learn(experiences, GAMMA, agent_number)
+
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
