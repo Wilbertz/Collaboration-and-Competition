@@ -10,7 +10,7 @@
 
 ## Introduction <a name="introduction"></a>
 <p align="center">
-    <img src="./images/robot-table-tennis.gif" width="800" title="Random Agent" alt="Robot playing tennis.">
+    <img src="./images/tennis.gif" width="800" title="Random Agent" alt="Robot playing tennis.">
 </p>
 
 ## Directory Structure <a name="directoryStructure"></a>
