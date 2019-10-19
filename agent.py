@@ -79,7 +79,85 @@ class Agent:
                 experiences = self.memory.sample()
                 self.learn(experiences, GAMMA, agent_number)
 
-    def soft_update(self, local_model, target_model, tau):
+    def act(self, states, add_noise):
+        """Returns actions for both agents as per current policy, given their respective states."""
+        states = torch.from_numpy(states).float().to(device)
+        actions = np.zeros((self.num_agents, self.action_size))
+        self.actor_local.eval()
+        with torch.no_grad():
+            # get action for each agent and concatenate them
+            for agent_num, state in enumerate(states):
+                action = self.actor_local(state).cpu().data.numpy()
+                actions[agent_num, :] = action
+        self.actor_local.train()
+        # add noise to actions
+        if add_noise:
+            actions += self.eps * self.noise.sample()
+        actions = np.clip(actions, -1, 1)
+        return actions
+
+    def reset(self):
+        self.noise.reset()
+
+    def learn(self, experiences, gamma, agent_number):
+        """Update policy and value parameters using given batch of experience tuples.
+        Q_targets = r + γ * critic_target(next_state, actor_target(next_state))
+        where:
+            actor_target(state) -> action
+            critic_target(state, action) -> Q-value
+        Params
+        ======
+            experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples
+            gamma (float): discount factor
+        """
+        states, actions, rewards, next_states, dones = experiences
+
+        # ---------------------------- update critic ---------------------------- #
+        # Get predicted next-state actions and Q values from target models
+        actions_next = self.actor_target(next_states)
+        # Construct next actions vector relative to the agent
+        if agent_number == 0:
+            actions_next = torch.cat((actions_next, actions[:, 2:]), dim=1)
+        else:
+            actions_next = torch.cat((actions[:, :2], actions_next), dim=1)
+        # Compute Q targets for current states (y_i)
+        Q_targets_next = self.critic_target(next_states, actions_next)
+        Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
+        # Compute critic loss
+        Q_expected = self.critic_local(states, actions)
+        critic_loss = f.mse_loss(Q_expected, Q_targets)
+        # Minimize the loss
+        self.critic_optimizer.zero_grad()
+        critic_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
+        self.critic_optimizer.step()
+
+        # ---------------------------- update actor ---------------------------- #
+        # Compute actor loss
+        actions_pred = self.actor_local(states)
+        # Construct action prediction vector relative to each agent
+        if agent_number == 0:
+            actions_pred = torch.cat((actions_pred, actions[:, 2:]), dim=1)
+        else:
+            actions_pred = torch.cat((actions[:, :2], actions_pred), dim=1)
+        # Compute actor loss
+        actor_loss = -self.critic_local(states, actions_pred).mean()
+        # Minimize the loss
+        self.actor_optimizer.zero_grad()
+        actor_loss.backward()
+        self.actor_optimizer.step()
+
+        # ----------------------- update target networks ----------------------- #
+        self.soft_update(self.critic_local, self.critic_target, TAU)
+        self.soft_update(self.actor_local, self.actor_target, TAU)
+
+        # update noise decay parameter
+        self.eps -= self.eps_decay
+        self.eps = max(self.eps, EPS_FINAL)
+        self.noise.reset()
+
+    @staticmethod
+    def soft_update(local_model, target_model, tau):
         """Soft update model parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
         Params
