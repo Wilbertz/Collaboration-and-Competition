@@ -1,5 +1,8 @@
 # Collaboration and Competition
 
+<p align="center">
+    <img src="./images/robottennis.jpg" width="800" title="Random Agent" alt="Robot playing tennis.">
+</p>
 ## Table of Contents
 
 1. [Introduction](#introduction)
