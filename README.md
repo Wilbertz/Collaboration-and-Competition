@@ -3,6 +3,7 @@
 <p align="center">
     <img src="./images/robot-tennis.jpg" width="220" title="Random Agent" alt="Robot playing tennis.">
 </p>
+
 ## Table of Contents
 
 1. [Introduction](#introduction)
