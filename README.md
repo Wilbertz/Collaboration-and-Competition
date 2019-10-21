@@ -37,3 +37,10 @@ This project was written in Python 3.6, using a Jupyter Notebook on Anaconda. Cu
 Follow the instructions in Collaboration_and_Competition.ipynb to get started.
 
 ## Results <a name="results"></a>
+
+The environment was solved in 890 episodes. An averaged score of 0.504 was reached. 
+Below is a plot with the scores:
+
+![scores](images/scores_plot.png)
+
+A more detailed description of the results can be found in the Report.md file.
