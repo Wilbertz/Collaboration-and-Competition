@@ -48,3 +48,11 @@ Below is a plot with the scores:
 ![scores](images/scores_plot.png)
 
 ## Ideas for improvement
+
+- Priority Experienced Replay  
+The algorithm could be improved by using Priority Experienced Replay where important experience will be sampled more often:
+[A novel DDPG method with prioritized experience replay](https://www.semanticscholar.org/paper/A-novel-DDPG-method-with-prioritized-experience-Hou-Liu/027d002d205e49989d734603ff0c2f7cbfa6b6dd).
+This technique can reduce the training time and improve the stability of the learning process.
+
+- Hyperparameter  
+Last not least, hyperparameter search should improve the performance too.
