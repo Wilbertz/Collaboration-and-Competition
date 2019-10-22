@@ -22,6 +22,7 @@ GPU = 0                        # GPU ID for multi-GPU machines
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+
 class Group():
     def __init__(self, num_agents, state_size, action_size, random_seed):
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
@@ -47,6 +48,7 @@ class Group():
             'actor': agent.actor_local.state_dict(),
             'critic': agent.critic_local.state_dict()
         } for agent in self.agents]
+
 
 class Agent():
     """Interacts with and learns from the environment."""
@@ -81,8 +83,9 @@ class Agent():
 
         # Replay memory
         self.memory = memory # ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
-        
-    def hard_copy(self, target, source):
+
+    @staticmethod
+    def hard_copy(target, source):
         for target_param, param in zip(target.parameters(), source.parameters()):
             target_param.data.copy_(param.data)
     
@@ -151,7 +154,8 @@ class Agent():
         self.soft_update(self.critic_local, self.critic_target, TAU)
         self.soft_update(self.actor_local, self.actor_target, TAU)                     
 
-    def soft_update(self, local_model, target_model, tau):
+    @staticmethod
+    def soft_update(local_model, target_model, tau):
         """Soft update model parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
 
@@ -163,6 +167,7 @@ class Agent():
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
+
 
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
@@ -185,6 +190,7 @@ class OUNoise:
         dx = self.theta * (self.mu - x) + self.sigma * np.array([random.random() for i in range(len(x))])
         self.state = x + dx
         return self.state
+
 
 class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
@@ -217,7 +223,7 @@ class ReplayBuffer:
         next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(device)
         dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
 
-        return (states, actions, rewards, next_states, dones)
+        return states, actions, rewards, next_states, dones
 
     def __len__(self):
         """Return the current size of internal memory."""
