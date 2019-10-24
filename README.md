@@ -17,6 +17,23 @@
     <img src="./images/tennis.gif" width="800" title="Random Agent" alt="Robot playing tennis.">
 </p>
 
+In this project, we will train Agents to play tennis.
+
+- Action Space  
+There are two actions for an Agent, related to the movement relative to the net, and the possibility to jump.
+
+- Observation Space  
+The observation space consists of 8 variables corresponding to position and velocity of the ball and racket.
+
+- Rewards  
+A reward of +0.1 is given to an Agent if it hits the ball over the net. If the ball hits the floor, or is hit 
+out of bounds, a negative reward of -0.01 is given. This encourages the Agents to keep the ball in play as 
+long as possible.
+
+- Goal  
+The training of the Agents is over, once an average score of +0.5 over 100 consecutive episodes is obtained, 
+after taking the maximum score of the two Agents.
+
 ## Directory Structure <a name="directoryStructure"></a>
 
 - Root /
@@ -34,7 +51,7 @@
         
 ## Installation <a name="installation"></a>
 
-This project was written in Python 3.6, using a Jupyter Notebook on Anaconda. Currently (September 2019) you cannot use Python 3.7, since tensorflow 1.7.1 doesn't have a version corresponding to python 3.7 yet.
+This project was written in Python 3.6, using a Jupyter Notebook on Anaconda. Currently (October 2019) you cannot use Python 3.7, since tensorflow 1.7.1 doesn't have a version corresponding to python 3.7 yet.
 
 ## Instructions <a name="instructions"></a>
 
