@@ -22,15 +22,15 @@
 - Root /
     - README.md (This readme file)
     - Report.md (A report describing results)
-    - Collaboration_and_Competition.ipynb (The Jupyter notebook)
+    - Tennis.ipynb (The Jupyter notebook)
     - model.py (The neural network)
     - agent.py (The agent used for learning)
-    - checkpoint_actor.pth (The neural network weights for the actor)
-    - checkpoint_critic.pth (The neural network weights for the critic)
+    - checkpoint.pth (The neural network weights for the actors and critics)
     - .gitignore (Git uses it to determine which files and directories to ignore)
     - images /  
-        - robot-table-tennis.gif  (Image of a robot playing tennis)
+        - robot-tennis.jpg  (Image of a robot playing tennis)
         - scores_plot.png (Plot of the scores during the learning process)
+        - MADDPG.png (Image of MADDPG pseudocode)
         
 ## Installation <a name="installation"></a>
 
