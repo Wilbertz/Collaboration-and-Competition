@@ -10,6 +10,10 @@ The report contains three parts:
 
 ## Design and Implementation
 
+The solution uses the MADDPG algorithm, using separate actors and critics. A shared memory buffer is used. 
+
+The agents solved the task after 890 episodes.
+ 
 An Ornstein-Uhlenbeck process (Uhlenbeck & Ornstein, 1930) with &mu; = 0.15 and &theta; = 0.2 was used in order to add noise.
 This process is a stationary Gauss–Markov process, which means that it is a Gaussian process, a Markov process, and is temporally homogeneous.
 
@@ -29,7 +33,7 @@ An ADAM optimizer was used to learn the network parameters.
 
 ### Hyperparameters
 
-  The code uses a lot of hyperparameters. The values a are given below
+  The code uses a lot of hyper-parameters. The values a are given below:
 
   | Hyperparameter                      | Value   |
   | ----------------------------------- | ------- |
@@ -47,6 +51,7 @@ Below is a plot with the scores:
 
 ![scores](images/scores_plot.png)
 
+
 ## Ideas for improvement
 
 - Priority Experienced Replay  
@@ -55,4 +60,8 @@ The algorithm could be improved by using Priority Experienced Replay where impor
 This technique can reduce the training time and improve the stability of the learning process.
 
 - Hyperparameter  
-Last not least, hyperparameter search should improve the performance too.
+Different Hyperparameter should improve the performance too.
+
+- Rectified Adam (RAdam)  
+A new optimizer to speed up the training process 
+[Rectified Adam (RAdam)](https://medium.com/@lessw/new-state-of-the-art-ai-optimizer-rectified-adam-radam-5d854730807b) could be used. 
