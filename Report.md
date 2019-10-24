@@ -10,8 +10,9 @@ The report contains three parts:
 
 ## Design and Implementation
 
-The solution uses the MADDPG algorithm, using separate actors and critics. A shared memory buffer is used. 
+The solution uses the [MADDPG](https://arxiv.org/pdf/1706.02275.pdf) algorithm, using separate actors and critics. A shared memory buffer is used. 
 
+A lot of code from my previous exercise [Continuous Control](http://github.com/wilbertz/Continuous-Control) was reused.
 The agents solved the task after 890 episodes.
  
 An Ornstein-Uhlenbeck process (Uhlenbeck & Ornstein, 1930) with &mu; = 0.15 and &theta; = 0.2 was used in order to add noise.
