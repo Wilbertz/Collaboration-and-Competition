@@ -10,7 +10,20 @@ The report contains three parts:
 
 ## Design and Implementation
 
-The solution uses the [MADDPG](https://arxiv.org/pdf/1706.02275.pdf) algorithm, using separate actors and critics. A shared memory buffer is used. 
+The solution uses the [MADDPG](https://arxiv.org/pdf/1706.02275.pdf) algorithm, using separate actors and critics. 
+
+A simple extension of single agent RL algorithms by training 2 agents independently is problematic. In this case both 
+agents are updating their policies simultaneously. This results in an environment that appears to be non-stationary for 
+both agents. The convergence guarantees of many RL algorithms require stationary environments
+
+In MADDPG we know the actions taken by all agents, therefore the environment is stationary even as the policies change.
+
+In MADDPG, a critic uses the observations and actions from all the agents for training. In contrast each agent’s 
+actor is trained using just its own observations. Therefore the agents are trained without other agents’ observations.
+
+The pseudocode for the algorithm is shown below:
+
+![MADDPG](images/MADDPG.png)
 
 A lot of code from my previous exercise [Continuous Control](http://github.com/wilbertz/Continuous-Control) was reused.
 The agents solved the task after 890 episodes.
