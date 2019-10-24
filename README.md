@@ -53,6 +53,15 @@ after taking the maximum score of the two Agents.
 
 This project was written in Python 3.6, using a Jupyter Notebook on Anaconda. Currently (October 2019) you cannot use Python 3.7, since tensorflow 1.7.1 doesn't have a version corresponding to python 3.7 yet.
 
+The relevant Python packages for this project are as follows:
+
+- numpy  
+- torch  
+- torch.nn  
+- torch.nn.functional  
+- torch.optim  
+- matplotlib.pyplot  
+- unityagents 
 ## Instructions <a name="instructions"></a>
 
 Follow the instructions in Collaboration_and_Competition.ipynb to get started.
