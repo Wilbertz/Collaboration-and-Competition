@@ -63,9 +63,7 @@ The relevant Python packages for this project are as follows:
 - matplotlib.pyplot  
 - unityagents 
 
-In order to use the code you have to download the environment from one of the links below.
-
-Download the environment from one of the links below.  
+In order to use the code you have to download the environment from one of the links below:
 
 - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Linux.zip)  
 - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis.app.zip)  
