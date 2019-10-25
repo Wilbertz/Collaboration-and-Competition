@@ -72,9 +72,19 @@ In order to use the code you have to download the environment from one of the li
 
 You need only select the environment that matches your operating system:
 
+Place the file in the GitHub repository and unzip (or decompress) the file.
+
 ## Instructions <a name="instructions"></a>
 
 Follow the instructions in Collaboration_and_Competition.ipynb to get started.
+
+In order to train a network you have to create an agent:
+
+agent = Agent(state_size=state_size, action_size=action_size, n_agents=num_agents, seed=random_seed)
+
+Execute the learning method ddpg. (This will take around 80 minute when using GPU.)
+
+scores = ddpg()
 
 ## Results <a name="results"></a>
 
