@@ -51,12 +51,13 @@ An ADAM optimizer was used to learn the network parameters.
 
   | Hyperparameter                      | Value   |
   | ----------------------------------- | ------- |
-  | Gamma (discount factor)             | 0.99    |
+  | Gamma (discount factor)             | 0.90    |
   | Tau                                 | 1e-3    |
   | Learning rate actor                 | 1e-3    |
   | Learning rate critic                | 1e-3    |
-  | Batch size                          | 1024    |
-  | Replay buffer size                  | 1000000 |
+  | Batch size                          | 256     |
+  | Replay buffer size                  | 100000  |
+  | L2 Weight Decay                     | 1e-6    |
 
 ## Results
 
