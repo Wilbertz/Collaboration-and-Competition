@@ -62,6 +62,11 @@ The relevant Python packages for this project are as follows:
 - torch.optim  
 - matplotlib.pyplot  
 - unityagents 
+
+In order to use the code you have to download the environment from one of the links below.
+
+You need only select the environment that matches your operating system:
+
 ## Instructions <a name="instructions"></a>
 
 Follow the instructions in Collaboration_and_Competition.ipynb to get started.
