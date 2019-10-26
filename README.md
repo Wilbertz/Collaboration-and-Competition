@@ -90,7 +90,7 @@ scores = maddpg(n_episodes=10000)
 
 ## Results <a name="results"></a>
 
-The environment was solved in 890 episodes. An averaged score of 0.504 was reached. 
+The environment was solved in 4651 episodes. An averaged score of 0.515 was reached. 
 Below is a plot with the scores:
 
 ![scores](images/scores_plot.png)
