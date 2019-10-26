@@ -6,6 +6,17 @@ import torch.nn.functional as f
 
 
 def hidden_init(layer):
+    """"
+            Method used by both the Actor and Critic to initialize the hidden layer.
+
+            Xavier initialisation helps to keep the signal from exploding to a high value or
+            vanishing to zero. In other words, we need to initialize the weights in such a way
+            that the variance remains the same for x and y.
+            Args:
+                    layer: The hidden layer that has to be initialized.
+            Returns:
+                    A tuple of limit vectors.
+        """
     fan_in = layer.weight.data.size()[0]
     lim = 1. / np.sqrt(fan_in)
     return -lim, lim
