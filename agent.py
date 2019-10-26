@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 import random
 import copy
@@ -10,7 +12,7 @@ import torch.nn.functional as f
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e5)         # replay buffer size
-BATCH_SIZE = 256               # minibatch size
+BATCH_SIZE = 256               # mini batch size
 GAMMA = 0.9                    # discount factor
 TAU = 1e-3                     # for soft update of target parameters
 LR_ACTOR = 1e-3                # learning rate of the actor 
@@ -18,12 +20,13 @@ LR_CRITIC = 1e-3               # learning rate of the critic
 WEIGHT_DECAY = 1e-6            # L2 weight decay
 
 SIGMA = 0.1                    # for OUNoise
-GPU = 0                        # GPU ID for multi-GPU machines
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+""""A named tuple used to collect the different fields within the replay buffer"""
+ExperienceTuple = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
 
-class Group():
+class Group:
     def __init__(self, num_agents, state_size, action_size, random_seed):
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
         self.agents = [Agent(self.memory, state_size, action_size, random_seed) for _ in range(num_agents)]
@@ -50,39 +53,38 @@ class Group():
         } for agent in self.agents]
 
 
-class Agent():
+class Agent:
     """Interacts with and learns from the environment."""
     
-    def __init__(self, memory, state_size, action_size, random_seed):
-        """Initialize an Agent object.
-        
-        Params
-        ======
-            state_size (int): dimension of each state
-            action_size (int): dimension of each action
-            random_seed (int): random seed
+    def __init__(self, memory, state_size: int, action_size: int, seed: int):
+        """Initializes an Agent object.
+         Args:
+                memory (ReplayBuffer): The ReplayBuffer shared between the agents.
+                state_size (int): The dimension of the state vector.
+                action_size (int): The dimension of the action vector.
+                seed (int): The initialization value for the random number generator.
         """
         self.state_size = state_size
         self.action_size = action_size
-        self.seed = random.seed(random_seed)
+        self.seed = random.seed(seed)
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Actor(state_size, action_size, random_seed).to(device)
-        self.actor_target = Actor(state_size, action_size, random_seed).to(device)
-        self.hard_copy(self.actor_target, self.actor_local) ## !
+        self.actor_local = Actor(state_size, action_size, seed).to(device)
+        self.actor_target = Actor(state_size, action_size, seed).to(device)
+        self.hard_copy(self.actor_target, self.actor_local)
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
 
         # Critic Network (w/ Target Network)
-        self.critic_local = Critic(state_size, action_size, random_seed).to(device)
-        self.critic_target = Critic(state_size, action_size, random_seed).to(device)
-        self.hard_copy(self.critic_target, self.critic_local) ## !
+        self.critic_local = Critic(state_size, action_size, seed).to(device)
+        self.critic_target = Critic(state_size, action_size, seed).to(device)
+        self.hard_copy(self.critic_target, self.critic_local)
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
 
         # Noise process
-        self.noise = OUNoise(action_size, random_seed)
+        self.noise = OUNoise(action_size, seed)
 
         # Replay memory
-        self.memory = memory # ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
+        self.memory = memory
 
     @staticmethod
     def hard_copy(target, source):
@@ -178,6 +180,7 @@ class OUNoise:
         self.theta = theta
         self.sigma = sigma
         self.seed = random.seed(seed)
+        self.state = None
         self.reset()
 
     def reset(self):
@@ -195,36 +198,60 @@ class OUNoise:
 class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
 
-    def __init__(self, action_size, buffer_size, batch_size, seed):
-        """Initialize a ReplayBuffer object.
-        Params
-        ======
-            buffer_size (int): maximum size of buffer
-            batch_size (int): size of each training batch
+    def __init__(self, action_size: int, buffer_size: int, batch_size: int, seed: int) -> None:
+        """
+            Initialize a ReplayBuffer object.
+            Args:
+                action_size (int): The dimension of each action
+                buffer_size (int): The maximum size (number of tuples) of the buffer
+                batch_size (int): The size of each training batch
+                seed (int): The initialization parameter for the random number generator.
         """
         self.action_size = action_size
         self.memory = deque(maxlen=buffer_size)  # internal memory (deque)
         self.batch_size = batch_size
-        self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
+        self.experience = ExperienceTuple
         self.seed = random.seed(seed)
     
-    def add(self, state, action, reward, next_state, done):
-        """Add a new experience to memory."""
+    def add(self, state: torch.Tensor, action: torch.Tensor, reward: torch.Tensor,
+            next_state: torch.Tensor, done: torch.Tensor) -> None:
+        """
+            Create a new experience tuple and add it to the Replay buffer..
+            Args:
+                state (torch.Tensor): A state vector.
+                action (torch.Tensor): An action vector.
+                reward  (torch.Tensor): A reward vector.
+                next_state  (torch.Tensor): A vector containing the states following the given states.
+                done  (torch.Tensor): A vector containing done flags.
+        """
         e = self.experience(state, action, reward, next_state, done)
         self.memory.append(e)
     
-    def sample(self):
-        """Randomly sample a batch of experiences from memory."""
+    def sample(self) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        """
+            Retrieve a batch size random sample from the ReplayBuffer.
+            Returns:
+               The random sample from the ReplayBuffer.
+        """
         experiences = random.sample(self.memory, k=self.batch_size)
 
-        states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(device)
-        actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).float().to(device)
-        rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None])).float().to(device)
-        next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(device)
-        dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
+        states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None]))\
+            .float().to(device)
+        actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None]))\
+            .float().to(device)
+        rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None]))\
+            .float().to(device)
+        next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None]))\
+            .float().to(device)
+        dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8))\
+            .float().to(device)
 
         return states, actions, rewards, next_states, dones
 
-    def __len__(self):
-        """Return the current size of internal memory."""
+    def __len__(self) -> int:
+        """
+            Return the current number of samples within the ReplayBuffer.
+            Returns:
+               The current number (int) of samples within the ReplayBuffer.
+        """
         return len(self.memory)
