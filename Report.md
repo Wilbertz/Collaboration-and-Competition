@@ -26,7 +26,7 @@ The pseudocode for the algorithm is shown below:
 ![MADDPG](images/MADDPG.png)
 
 A lot of code from my previous exercise [Continuous Control](http://github.com/wilbertz/Continuous-Control) was reused.
-The agents solved the task after 890 episodes.
+The agents solved the task after 4651 episodes.
  
 An Ornstein-Uhlenbeck process (Uhlenbeck & Ornstein, 1930) with &mu; = 0.0, &theta; = 0.15 and &sigma; = 0.1 was used in order to add noise.
 This process is a stationary Gauss–Markov process, which means that it is a Gaussian process, a Markov process, and is temporally homogeneous.
