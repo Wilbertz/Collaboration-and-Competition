@@ -7,16 +7,16 @@ import torch.nn.functional as f
 
 def hidden_init(layer):
     """"
-            Method used by both the Actor and Critic to initialize the hidden layer.
+        Method used by both the Actor and Critic to initialize the hidden layer.
 
-            Xavier initialisation helps to keep the signal from exploding to a high value or
-            vanishing to zero. In other words, we need to initialize the weights in such a way
-            that the variance remains the same for x and y.
-            Args:
-                    layer: The hidden layer that has to be initialized.
-            Returns:
-                    A tuple of limit vectors.
-        """
+        Xavier initialisation helps to keep the signal from exploding to a high value or
+        vanishing to zero. In other words, we need to initialize the weights in such a way
+        that the variance remains the same for x and y.
+        Args:
+                layer: The hidden layer that has to be initialized.
+        Returns:
+                A tuple of limit vectors.
+    """
     fan_in = layer.weight.data.size()[0]
     lim = 1. / np.sqrt(fan_in)
     return -lim, lim
@@ -25,7 +25,7 @@ def hidden_init(layer):
 class Actor(nn.Module):
     """Actor (Policy) Model."""
 
-    def __init__(self, state_size, action_size, seed, fc1_units=128, fc2_units=64):
+    def __init__(self, state_size: int, action_size: int, seed: int, fc1_units: int = 128, fc2_units: int = 64) -> None:
         """
             Initialize fields and build the model.
             Args:
@@ -42,7 +42,7 @@ class Actor(nn.Module):
         self.fc3 = nn.Linear(fc2_units, action_size)
         self.reset_parameters()
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         """
            Reset the nodes weights.
         """
@@ -66,7 +66,8 @@ class Actor(nn.Module):
 class Critic(nn.Module):
     """Critic (Value) Model."""
 
-    def __init__(self, state_size, action_size, seed, fcs1_units=128, fc2_units=64):
+    def __init__(self, state_size : int, action_size: int , seed: int, fcs1_units: int = 128, fc2_units: int = 64) \
+            -> None:
         """
             Initialize parameters and build model. T
             Args:
@@ -83,7 +84,7 @@ class Critic(nn.Module):
         self.fc3 = nn.Linear(fc2_units, 1)
         self.reset_parameters()
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         """
             Reset the nodes weights.
         """
@@ -101,6 +102,7 @@ class Critic(nn.Module):
                 An single q value.
         """
         xs = f.relu(self.fcs1(state))
+
         x = torch.cat((xs, action), dim=1)
         x = f.relu(self.fc2(x))
         x = self.fc3(x)
