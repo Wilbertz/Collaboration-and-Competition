@@ -76,7 +76,7 @@ class AgentCollection:
     
     def checkpoint(self):
         """
-            Copy the actor internal state..
+            Copy the actor internal state.
                 Returns
                    A dictionary of actor states.
         """
