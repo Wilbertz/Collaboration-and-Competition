@@ -27,27 +27,59 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 ExperienceTuple = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
 
 
-class Group:
-    def __init__(self, num_agents, state_size, action_size, random_seed):
+class AgentCollection:
+    """ A collection of agents that share a common replay buffer."""
+
+    def __init__(self, num_agents: int, state_size: int, action_size: int, random_seed: int):
+        """Initializes an AgentCollection object.
+                 Args:
+                        num_agents (int): The number of agents within the collection.
+                        state_size (int): The dimension of the state vector.
+                        action_size (int): The dimension of the action vector.
+                        random_seed (int): The initialization value for the random number generator.
+                """
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
         self.agents = [Agent(self.memory, state_size, action_size, random_seed) for _ in range(num_agents)]
         
     def reset_noise(self):
+        """ Reset the Ornstein Uhlenbeck process within all agents. """
         for agent in self.agents:
             agent.reset()
         
-    def step(self, states, actions, rewards, next_states, dones):
+    def step(self, states, actions, rewards, next_states, dones) -> None:
+        """
+           Save the experience within the ReplayBuffer.
+               Args:
+                   states (list of torch.Tensor): A state vector.
+                   actions (List of torch.Tensor): An action vector.
+                   rewards (List of torch.Tensor): A reward vector.
+                   next_states (List of torch.Tensor): A vector containing the states following the given states.
+                   dones (list of torch.Tensor): A vector containing done flags.
+        """
         for agent, state, action, reward, next_state, done in \
                 zip(self.agents, states, actions, rewards, next_states, dones):
             agent.step(state, action, reward, next_state, done)
         
     def act(self, states):
+        """
+            Using the actor network the method return a vector of actions given the state vector
+            using the current policy.
+                Args:
+                    states (list of torch.Tensor): A state vector.
+                Returns:
+                    An list of action vectors.
+        """
         actions = list()
         for agent, state in zip(self.agents, states):
             actions.append(agent.act(state))
         return actions
     
     def checkpoint(self):
+        """
+            Copy the actor internal state..
+                Returns
+                   A dictionary of actor states.
+        """
         return [{
             'actor': agent.actor_local.state_dict(),
             'critic': agent.critic_local.state_dict()
@@ -88,22 +120,45 @@ class Agent:
         self.memory = memory
 
     @staticmethod
-    def hard_copy(target, source):
+    def hard_copy(target, source) -> None:
+        """
+            Copy the actor internal state..
+                Args:
+                    target: The target state
+                    source: The source state
+        """
         for target_param, param in zip(target.parameters(), source.parameters()):
             target_param.data.copy_(param.data)
-    
-    def step(self, state, action, reward, next_state, done):
-        """Save experience in replay memory, and use random sample from buffer to learn."""
+
+    def step(self, state: torch.Tensor, action: torch.Tensor, reward: torch.Tensor,
+             next_state: torch.Tensor, done: torch.Tensor):
+        """
+            Save the experience within the ReplayBuffer.
+                Args:
+                    state (torch.Tensor): A state vector.
+                    action (torch.Tensor): An action vector.
+                    reward (torch.Tensor): A reward vector.
+                    next_state (torch.Tensor): A vector containing the states following the given states.
+                    done (torch.Tensor): A vector containing done flags.
+        """
         # Save experience / reward
         self.memory.add(state, action, reward, next_state, done)
 
-        # Learn, if enough samples are available in memory
+        """ In case there are enough experiences within ReplayBuffer, start learning. """
         if len(self.memory) > BATCH_SIZE:
             experiences = self.memory.sample()
             self.learn(experiences, GAMMA)
 
-    def act(self, state, add_noise=True):
-        """Returns actions for given state as per current policy."""
+    def act(self, state: torch.Tensor, add_noise: bool = True):
+        """
+            Using the actor network the method return a vector of actions given the state vector
+            using the current policy.
+                Args:
+                    state (torch.Tensor): A state vector.
+                    add_noise (bool): A flag indicating the use of noise.
+                Returns:
+                    An vector of actions.
+        """
         state = torch.from_numpy(state).float().to(device)
         self.actor_local.eval()
         with torch.no_grad():
@@ -114,19 +169,20 @@ class Agent:
         return np.clip(action, -1, 1)
 
     def reset(self):
+        """ Reset the Ornstein Uhlenbeck process. """
         self.noise.reset()
 
-    def learn(self, experiences, gamma):
-        """Update policy and value parameters using given batch of experience tuples.
-        Q_targets = r + γ * critic_target(next_state, actor_target(next_state))
-        where:
-            actor_target(state) -> action
-            critic_target(state, action) -> Q-value
-
-        Params
-        ======
-            experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples 
-            gamma (float): discount factor
+    def learn(self, experiences: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor],
+              gamma: float) -> None:
+        """
+            Update policy and value parameters using given batch of experience tuples.
+            Q_targets = r + γ * critic_target(next_state, actor_target(next_state))
+            where:
+                actor_target(state) -> action
+                critic_target(state, action) -> Q-value
+            Args:
+                experiences (Tuple[torch.Tensor]): Tuple of (s, a, r, s', done) tuples
+                gamma (float): discount factor
         """
         states, actions, rewards, next_states, dones = experiences
 
@@ -158,15 +214,15 @@ class Agent:
         self.soft_update(self.actor_local, self.actor_target, TAU)                     
 
     @staticmethod
-    def soft_update(local_model, target_model, tau):
-        """Soft update model parameters.
-        θ_target = τ*θ_local + (1 - τ)*θ_target
+    def soft_update(local_model, target_model, tau: float) -> None:
+        """
+           Update the model parameters according to this formula:
+           θ_target = τ*θ_local + (1 - τ)*θ_target
 
-        Params
-        ======
-            local_model: PyTorch model (weights will be copied from)
-            target_model: PyTorch model (weights will be copied to)
-            tau (float): interpolation parameter 
+           Args:
+               local_model (PyTorch model): weights will be copied from this model
+               target_model (PyTorch model): weights will be copied to this model
+               tau (float): interpolation parameter, tau = 1 results in complete overwrite
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
