@@ -17,18 +17,20 @@
     <img src="./images/tennis.gif" width="800" title="Random Agent" alt="Robot playing tennis.">
 </p>
 
-In this project, we will train Agents to play tennis.
+The goal of this project is to train two RL agents to play tennis. 
+In this environment, two agents control rackets to bounce a ball over a net. 
+The environment is similar, but not identical to the Tennis environment on the Unity ML-Agents GitHub page.
 
 - Action Space  
 There are two actions for an Agent, related to the movement relative to the net, and the possibility to jump.
 
 - Observation Space  
-The observation space consists of 8 variables corresponding to position and velocity of the ball and racket.
+The observation space consists of 8 variables corresponding to position and velocity of the ball and rackets.
 
 - Rewards  
-A reward of +0.1 is given to an Agent if it hits the ball over the net. If the ball hits the floor, or is hit 
-out of bounds, a negative reward of -0.01 is given. This encourages the Agents to keep the ball in play as 
-long as possible.
+A reward of +0.1 is given to an Agent if it hits the ball over the net. If the ball hits the ground, or is hit 
+out of bounds, a negative reward of -0.01 is given. There is no discounting. This encourages the Agents to keep the 
+ball in play as long as possible.
 
 - Goal  
 The training of the Agents is over, once an average score of +0.5 over 100 consecutive episodes is obtained, 
