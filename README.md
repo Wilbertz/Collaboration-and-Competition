@@ -78,7 +78,7 @@ Place the file in the GitHub repository and unzip (or decompress) the file.
 
 ## Instructions <a name="instructions"></a>
 
-Follow the instructions in Collaboration_and_Competition.ipynb to get started.
+Follow the instructions in Tennis.ipynb to get started.
 
 In order to train a network you have to create an agent:
 
