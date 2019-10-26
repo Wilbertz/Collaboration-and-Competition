@@ -59,7 +59,7 @@ An ADAM optimizer was used to learn the network parameters.
 
 ## Results
 
-The environment was solved in 890 episodes. An averaged score of 0.504 was reached. 
+The environment was solved in 4651 episodes. An averaged score of 0.515 was reached. 
 Below is a plot with the scores:
 
 ![scores](images/scores_plot.png)
