@@ -80,13 +80,13 @@ Place the file in the GitHub repository and unzip (or decompress) the file.
 
 Follow the instructions in Tennis.ipynb to get started.
 
-In order to train a network you have to create an agent:
+In order to train a network you have to create an agent collection:
 
-agent = Agent(state_size=state_size, action_size=action_size, n_agents=num_agents, seed=random_seed)
+agents = AgentCollection(num_agents=num_agents, state_size=state_size, action_size=action_size, random_seed=42)
 
-Execute the learning method ddpg. (This will take around 80 minute when using GPU.)
+Execute the learning method maddpg. (This can take up to 4 hours when using GPU.)
 
-scores = ddpg()
+scores = maddpg(n_episodes=10000)
 
 ## Results <a name="results"></a>
 
