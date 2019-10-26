@@ -26,6 +26,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 """"A named tuple used to collect the different fields within the replay buffer"""
 ExperienceTuple = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
 
+
 class Group:
     def __init__(self, num_agents, state_size, action_size, random_seed):
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
@@ -37,7 +38,7 @@ class Group:
         
     def step(self, states, actions, rewards, next_states, dones):
         for agent, state, action, reward, next_state, done in \
-        zip(self.agents, states, actions, rewards, next_states, dones):
+                zip(self.agents, states, actions, rewards, next_states, dones):
             agent.step(state, action, reward, next_state, done)
         
     def act(self, states):
@@ -81,7 +82,7 @@ class Agent:
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
 
         # Noise process
-        self.noise = OUNoise(action_size, seed)
+        self.noise = OrnsteinUhlenbeckNoise(action_size, seed)
 
         # Replay memory
         self.memory = memory
@@ -132,12 +133,12 @@ class Agent:
         # ---------------------------- update critic ---------------------------- #
         # Get predicted next-state actions and Q values from target models
         actions_next = self.actor_target(next_states)
-        Q_targets_next = self.critic_target(next_states, actions_next)
+        q_targets_next = self.critic_target(next_states, actions_next)
         # Compute Q targets for current states (y_i)
-        Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
+        q_targets = rewards + (gamma * q_targets_next * (1 - dones))
         # Compute critic loss
-        Q_expected = self.critic_local(states, actions)
-        critic_loss = f.mse_loss(Q_expected, Q_targets)
+        q_expected = self.critic_local(states, actions)
+        critic_loss = f.mse_loss(q_expected, q_targets)
         # Minimize the loss
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
@@ -171,11 +172,20 @@ class Agent:
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
 
 
-class OUNoise:
-    """Ornstein-Uhlenbeck process."""
+class OrnsteinUhlenbeckNoise:
+    """ Ornstein-Uhlenbeck process. The process is a stationary Gauss–Markov process,
+    which means that it is a Gaussian process, a Markov process, and is temporally homogeneous."""
 
-    def __init__(self, size, seed, mu=0., theta=0.15, sigma=SIGMA):
-        """Initialize parameters and noise process."""
+    def __init__(self, size: int, seed: int, mu: float = 0., theta: float = 0.15, sigma: float = SIGMA) -> None:
+        """
+            Initialize an OrnsteinUhlenbeckNoise object.
+            Args:
+                size (int): The dimension of the noise vector.
+                seed (int): The initialization value for the random number generator.
+                mu (float): The mean value for the generated noise.
+                theta (float): The drift value of the process.
+                sigma (float): The diffusion value of the process.
+        """
         self.mu = mu * np.ones(size)
         self.theta = theta
         self.sigma = sigma
@@ -184,13 +194,17 @@ class OUNoise:
         self.reset()
 
     def reset(self):
-        """Reset the internal state (= noise) to mean (mu)."""
+        """ Reset the internal state to the mean value. """
         self.state = copy.copy(self.mu)
 
     def sample(self):
-        """Update internal state and return it as a noise sample."""
+        """
+            Updates internal state and returns an updated state vector.
+            Returns:
+               The updated state vector.
+        """
         x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.array([random.random() for i in range(len(x))])
+        dx = self.theta * (self.mu - x) + self.sigma * np.array([random.random() for _ in range(len(x))])
         self.state = x + dx
         return self.state
 
