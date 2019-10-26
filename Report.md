@@ -40,7 +40,9 @@ actions to Q-values.
 
 The final layer weights and biases of both the actor and critic
 were initialized from a uniform distribution [−3 × 10−3, 3 × 10−3] and [3 × 10−3, 3 × 10−3]. 
-This was to ensure the initial outputs for the policy and value estimates were near zero.
+This was to ensure the initial outputs for the policy and value estimates were near zero. The hidden layer were 
+initialized using Xavier initialization.
+
 An ADAM optimizer was used to learn the network parameters.
 
 ### Hyperparameters
